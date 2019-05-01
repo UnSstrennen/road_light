@@ -12,10 +12,10 @@ const unsigned long delay_time = 1500000;
 int main()
 {
     // outputs
-    DDRB |= (1<<relay);
-    DDRB |= (1<<switcher);
+    DDRB |= 1<<relay;
+    DDRB |= 1<<switcher;
     //inputs
-    DDRB &= ~(1 << move_sensor;
+    DDRB &= ~(1 << move_sensor);
 
     while (true) {
         if (PINB & (1 << move_sensor)) {
