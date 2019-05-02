@@ -13,9 +13,10 @@ int main()
 {
     // outputs
     DDRB |= 1<<relay;
-    DDRB |= 1<<switcher;
     //inputs
     DDRB &= ~(1 << move_sensor);
+    DDRB &= ~(1 << switcher);
+    PORTB |= 1<<switcher  //  pull-up
 
     while (true) {
         if (PINB & (1 << move_sensor)) {
