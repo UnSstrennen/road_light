@@ -2,7 +2,7 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
-#define F_CPU 1000000UL
+#define F_CPU 1000000
 #define relay PB1
 #define light_sensor PB4
 #define light_regulator PB3
