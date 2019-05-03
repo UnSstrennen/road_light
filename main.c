@@ -1,5 +1,6 @@
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/interrupt.h>
 
 #define F_CPU 1000000UL
 #define relay PB1
@@ -13,6 +14,20 @@ const unsigned long delay_time = 1500000;
 unsigned int now_light;
 unsigned int daylight;
 
+SIGNAL(SIG_INTERRUPT0)
+{
+	if (PINB & (1 << move_sensor)) {
+		if ((PINB & (1 << switcher))) {
+			light();
+		}
+		else {
+			if (now_light < daylight) {
+				light();
+			}
+		}
+	}	
+}
+
 int main()
 {
 	// outputs
@@ -20,25 +35,18 @@ int main()
 	//inputs
 	DDRB &= ~(1 << move_sensor);
 	DDRB &= ~(1 << switcher);
-	// PORTB |= (1 << switcher);  //  pull-up
+	PORTB |= (1 << switcher);  //  pull-up
 	
 	// ADC
 	ADCSRA |= (1<<ADEN)|(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0);// Разрешение использования АЦП + Делитель 128 = 64 кГц
 	ADMUX |= (1<<MUX1);
-	//ADMUX |= (1<<REFS1)|(1<<REFS0);
+	
+	// EXINT
+	GIMSK |= (1<<INT0);
+	MCUCR |= (1<<ISC00)|(1<<ISC01);
+	sei();
 	
 	while (1) {
-		if (PINB & (1 << move_sensor)) {
-			if ((PINB & (1 << switcher))) {
-				light();
-			}
-			else {
-				if (now_light < daylight) {
-					light();
-				}
-			}
-		}
-		
 		// ADC
 		now_light = getLight();
 		daylight = getDaylight();
