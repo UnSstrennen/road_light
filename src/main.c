@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
@@ -7,24 +9,16 @@
 #define light_sensor PB4
 #define light_regulator PB3
 #define move_sensor PB2
-#define switcher PB0
+#define night_led PB0
 
 const unsigned long delay_time = 1500000;
 
-unsigned int now_light;
-unsigned int daylight;
+bool night;
 
 SIGNAL(SIG_INTERRUPT0)
 {
-	if (PINB & (1 << move_sensor)) {
-		if ((PINB & (1 << switcher))) {
-			light();
-		}
-		else {
-			if (now_light < daylight) {
-				light();
-			}
-		}
+	if (night) {
+		light();
 	}
 }
 
@@ -32,10 +26,9 @@ int main()
 {
 	// outputs
 	DDRB |= 1<<relay;
+	DDRB |= 1<<night_led;
 	//inputs
 	DDRB &= ~(1 << move_sensor);
-	DDRB &= ~(1 << switcher);
-	PORTB |= (1 << switcher);  //  pull-up
 
 	// ADC
 	ADCSRA |= (1<<ADEN)|(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0);// Разрешение использования АЦП + Делитель 128 = 64 кГц
@@ -47,9 +40,15 @@ int main()
 	sei();
 
 	while (1) {
-		// ADC
-		now_light = getLight();
-		daylight = getDaylight();
+		unsigned int now_light = getLight();
+		unsigned int daylight = getDaylight();
+		night = now_light < daylight;
+		if (night) {
+			PORTB |= 1<<night_led;
+		}
+		else {
+			PORTB &= ~(1<<night_led);
+		}
 	}
 }
 
