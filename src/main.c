@@ -5,17 +5,17 @@
 #include <avr/interrupt.h>
 
 #define F_CPU 1000000
-#define relay PB1
+#define relay PB2
 #define light_sensor PB4
 #define light_regulator PB3
-#define move_sensor PB2
+#define move_sensor PB1
 #define night_led PB0
 
 const unsigned long delay_time = 1500000;
 
 bool night;
 
-SIGNAL(SIG_INTERRUPT0)
+ISR(INT0_vect)
 {
 	if (night) {
 		light();
